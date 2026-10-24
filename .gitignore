@@ -1,0 +1,77 @@
+# ============================================================
+# ملف الاستبعاد لمستودع Git
+# Arabic Handwriting Recognition - .gitignore
+# ============================================================
+
+# 1. مجموعات البيانات الضخمة (Datasets)
+/datasets/
+data/raw/
+data/interim/
+data/processed/
+data/extracted/
+data/archives/
+data/external/
+data/splits/
+*.csv
+*.bmp
+
+# 2. النماذج المدربة الثنائية (تُحفظ في مجلد models الجذري)
+/models/
+*.joblib
+*.pkl
+*.h5
+*.keras
+*.pt
+*.pth
+*.onnx
+
+# 3. ملفات وإرشادات العمل الخاصة / الداخلية
+project_summary.md
+*.gitkeep
+*.getkeep
+
+# 4. ملفات بايثون المؤقتة والكاش
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+
+# 5. البيئات الافتراضية
+.venv/
+venv/
+env/
+ENV/
+build/
+dist/
+*.egg-info/
+
+# 6. دفاتر جوبيتر المؤقتة
+.ipynb_checkpoints/
+
+# 7. محررات الأكواد ومساعدات الذكاء الاصطناعي
+.vscode/
+.idea/
+.agents/
+*.swp
+*.swo
+
+# 8. السجلات والمخرجات المؤقتة
+logs/
+*.log
+outputs/diagnostics/*.png
+outputs/model_comparison/*.png
+outputs/predictions/
+outputs/data_quality/
+outputs/feature_importance/
+
+# 9. الملفات المضغوطة والأرشيف
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# 10. ملفات النظام
+.DS_Store
+Thumbs.db
+desktop.ini

@@ -1,0 +1,52 @@
+{
+  "project": "Arabic Handwriting Recognition Intelligence Platform",
+  "generated_at": "2026-10-24T03:51:41.242820",
+  "datasets": [
+    {
+      "name": "AHCD (Arabic Handwritten Characters Dataset)",
+      "source": "Kaggle - mloey1/ahcd1",
+      "path": "datasets/httpswww.kaggle.commloey1ahcd1",
+      "task": "character_recognition",
+      "classes": 28,
+      "train_samples": 13440,
+      "test_samples": 3360,
+      "image_size": "32x32",
+      "features": 1024,
+      "format": "CSV (pixel values)"
+    },
+    {
+      "name": "AHDD (Arabic Handwritten Digits Dataset)",
+      "source": "Kaggle - mloey1/ahdd1",
+      "path": "datasets/httpswww.kaggle.commloey1ahdd1",
+      "task": "digit_recognition",
+      "classes": 10,
+      "train_samples": 60000,
+      "test_samples": 10000,
+      "image_size": "28x28",
+      "features": 784,
+      "format": "CSV (pixel values)"
+    },
+    {
+      "name": "AHDBase (Training Set)",
+      "path": "datasets/AHDBase_TrainingSet",
+      "task": "digit_recognition",
+      "format": "BMP images"
+    },
+    {
+      "name": "MAHDBase (Modified Arabic Handwritten Digit Base)",
+      "path": "datasets/MAHDBase_TrainingSet",
+      "task": "digit_recognition",
+      "format": "BMP images"
+    },
+    {
+      "name": "Arabic Handwritten Alphabets, Words and Paragraphs",
+      "path": "datasets/Arabic_Handwritten_Alphabets_Words_and_Paragraphs",
+      "task": "multi_recognition",
+      "writers": 82,
+      "alphabet_classes": 65,
+      "words": 10,
+      "paragraphs_per_user": 3,
+      "format": "PNG images"
+    }
+  ]
+}

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="منظومة ذكاء اصطناعي متقدمة للتعرف على الكتابة اليدوية العربية - أرقام وحروف وكلمات وفقرات - باستخدام تعلم الآلة الكلاسيكي فقط">
+    <title>منظومة التعرف على الكتابة اليدوية العربية | Arabic Handwriting OCR</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="bg-glow bg-glow-1"></div>
+    <div class="bg-glow bg-glow-2"></div>
+
+    <div class="container">
+        <!-- شريط الرأس -->
+        <header class="app-header">
+            <div class="logo-area">
+                <div class="logo-badge">ع</div>
+                <div class="logo-text">
+                    <h1>منظومة التعرف على الكتابة اليدوية العربية</h1>
+                    <p class="subtitle">Arabic Handwriting Intelligence Platform — تعلم آلة كلاسيكي 100% بدون شبكات عصبية</p>
+                </div>
+            </div>
+            <div class="header-status" id="headerStatus">
+                <span class="status-indicator"></span>
+                <span>جاري تحميل النماذج...</span>
+            </div>
+        </header>
+
+        <!-- بطاقات التقنية -->
+        <section class="tech-banner">
+            <div class="tech-item">
+                <span class="tech-icon">📐</span>
+                <div>
+                    <strong>استخراج الميزات</strong>
+                    <p>HOG + Hu Moments + Grid Density</p>
+                </div>
+            </div>
+            <div class="tech-item">
+                <span class="tech-icon">⚡</span>
+                <div>
+                    <strong>خوارزميات كلاسيكية</strong>
+                    <p>SVM (RBF) + Random Forest + KNN</p>
+                </div>
+            </div>
+            <div class="tech-item">
+                <span class="tech-icon">🎯</span>
+                <div>
+                    <strong>الدقة المحققة</strong>
+                    <p id="accuracyBadge">جاري الفحص...</p>
+                </div>
+            </div>
+            <div class="tech-item">
+                <span class="tech-icon">📚</span>
+                <div>
+                    <strong>مجموعات البيانات</strong>
+                    <p>AHCD + AHDD + MAHDBase + Words</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- اختيار وضع التعرف -->
+        <section class="mode-selector">
+            <h3 class="mode-title">🔧 اختر وضع التعرف:</h3>
+            <div class="mode-buttons">
+                <button class="mode-btn active" data-mode="auto" onclick="setMode('auto')">
+                    <span class="mode-icon">🔄</span>
+                    <span>تلقائي</span>
+                </button>
+                <button class="mode-btn" data-mode="digit" onclick="setMode('digit')">
+                    <span class="mode-icon">🔢</span>
+                    <span>أرقام</span>
+                </button>
+                <button class="mode-btn" data-mode="character" onclick="setMode('character')">
+                    <span class="mode-icon">✏️</span>
+                    <span>حروف</span>
+                </button>
+                <button class="mode-btn" data-mode="word" onclick="setMode('word')">
+                    <span class="mode-icon">📝</span>
+                    <span>كلمات</span>
+                </button>
+                <button class="mode-btn" data-mode="paragraph" onclick="setMode('paragraph')">
+                    <span class="mode-icon">📄</span>
+                    <span>فقرات</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- مساحة العمل الرئيسية -->
+        <main class="main-grid">
+            <!-- العمود الأيمن: الإدخال -->
+            <div class="card input-card">
+                <div class="card-tabs">
+                    <button class="tab-btn active" id="tab-canvas-btn" onclick="switchTab('canvas')">
+                        ✏️ لوحة الرسم الحي (Canvas)
+                    </button>
+                    <button class="tab-btn" id="tab-upload-btn" onclick="switchTab('upload')">
+                        📁 رفع صورة من جهازك
+                    </button>
+                </div>
+
+                <!-- تبويب لوحة الرسم -->
+                <div id="canvas-tab-content" class="tab-content active">
+                    <p class="tab-desc" id="canvasHint">ارسم أي حرف، رقم، أو كلمة عربية داخل اللوحة أدناه:</p>
+                    <div class="canvas-wrapper">
+                        <canvas id="paintCanvas" width="500" height="350"></canvas>
+                    </div>
+                    
+                    <div class="canvas-controls">
+                        <div class="tool-group">
+                            <label for="brushSize">سُمك القلم:</label>
+                            <input type="range" id="brushSize" min="4" max="40" value="18">
+                            <span id="brushSizeVal">18px</span>
+                        </div>
+                        <div class="action-buttons">
+                            <button class="btn btn-secondary" onclick="clearCanvas()">
+                                🗑️ مسح
+                            </button>
+                            <button class="btn btn-primary" onclick="recognizeCanvas()">
+                                🔍 تعرّف الآن
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- تبويب رفع الصورة -->
+                <div id="upload-tab-content" class="tab-content">
+                    <p class="tab-desc">اختر أو اسحب صورة حرف، رقم، كلمة، أو وثيقة عربية:</p>
+                    <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
+                        <div class="dropzone-inner">
+                            <span class="upload-icon">📤</span>
+                            <h4>انقر لاختيار ملف أو اسحب الصورة هنا</h4>
+                            <p>يدعم صيغ PNG, JPG, JPEG, BMP</p>
+                        </div>
+                        <input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="handleFileSelect(event)">
+                    </div>
+
+                    <div id="uploadPreviewWrapper" class="upload-preview-wrapper" style="display: none;">
+                        <img id="uploadPreview" src="" alt="معاينة الصورة المرفوعة">
+                        <div class="action-buttons mt-10">
+                            <button class="btn btn-secondary" onclick="resetUpload()">إلغاء</button>
+                            <button class="btn btn-primary" onclick="recognizeUpload()">🔍 تحليل الصورة</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- العمود الأيسر: النتائج -->
+            <div class="card result-card">
+                <div class="card-header">
+                    <h3>📊 نتيجة التعرف الفوري</h3>
+                    <span id="loadingBadge" class="loading-badge" style="display: none;">جاري التحليل...</span>
+                    <span id="modeBadge" class="mode-badge">الوضع: تلقائي</span>
+                </div>
+
+                <div class="prediction-box">
+                    <div class="primary-result">
+                        <span class="result-label">النتيجة المتوقعة:</span>
+                        <div class="result-char" id="resultChar">—</div>
+                    </div>
+                    <div class="confidence-gauge">
+                        <div class="gauge-label">
+                            <span>درجة الثقة:</span>
+                            <strong id="confidenceText">0%</strong>
+                        </div>
+                        <div class="gauge-bar-bg">
+                            <div class="gauge-bar-fill" id="confidenceBar" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                    <div class="result-meta" id="resultMeta" style="display: none;">
+                        <span id="resultMode" class="meta-tag"></span>
+                        <span id="resultAccuracy" class="meta-tag"></span>
+                    </div>
+                </div>
+
+                <!-- البدائل المحتملة -->
+                <div class="alternatives-section">
+                    <h4>الاحتمالات البديلة الأقرب:</h4>
+                    <div class="alternatives-list" id="alternativesList">
+                        <p class="text-muted">ارسم أو ارفع صورة للبدء بالتعرف...</p>
+                    </div>
+                </div>
+
+                <!-- مساحة تجميع النص -->
+                <div class="text-accumulator">
+                    <div class="accumulator-header">
+                        <h4>📝 النص المجمّع:</h4>
+                        <div class="accumulator-actions">
+                            <button class="btn-sm" onclick="appendCurrentChar()">➕ إضافة</button>
+                            <button class="btn-sm" onclick="addSpace()">⎵ مسافة</button>
+                            <button class="btn-sm" onclick="addNewLine()">↵ سطر</button>
+                            <button class="btn-sm" onclick="copyAccumulatedText()">📋 نسخ</button>
+                            <button class="btn-sm" onclick="downloadAccumulatedText()">💾 حفظ</button>
+                            <button class="btn-sm text-danger" onclick="clearAccumulatedText()">مسح</button>
+                        </div>
+                    </div>
+                    <textarea id="accumulatedTextArea" rows="4" placeholder="يمكنك تجميع الحروف والكلمات هنا، أو التعديل اليدوي عليها..."></textarea>
+                </div>
+            </div>
+        </main>
+
+        <!-- بطاقات مجموعات البيانات -->
+        <section class="datasets-section">
+            <h3>📚 مجموعات البيانات المستخدمة في التدريب</h3>
+            <div class="datasets-grid">
+                <div class="dataset-card">
+                    <div class="dataset-icon">🔢</div>
+                    <h4>AHDD — الأرقام</h4>
+                    <p>70,000 عينة رقم عربي</p>
+                    <span class="dataset-badge">28×28 بكسل</span>
+                </div>
+                <div class="dataset-card">
+                    <div class="dataset-icon">✏️</div>
+                    <h4>AHCD — الحروف</h4>
+                    <p>16,800 حرف عربي مكتوب يدوياً</p>
+                    <span class="dataset-badge">32×32 بكسل</span>
+                </div>
+                <div class="dataset-card">
+                    <div class="dataset-icon">📝</div>
+                    <h4>كلمات وفقرات</h4>
+                    <p>82 كاتباً × 10 كلمات + فقرات</p>
+                    <span class="dataset-badge">65 سياقاً</span>
+                </div>
+                <div class="dataset-card">
+                    <div class="dataset-icon">🗃️</div>
+                    <h4>AHDBase + MAHDBase</h4>
+                    <p>أرقام BMP متعددة الكتّاب</p>
+                    <span class="dataset-badge">آلاف العينات</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- تذييل الصفحة -->
+        <footer class="app-footer">
+            <p>مشروع التعرف على الكتابة اليدوية العربية — Clean Architecture & Traditional Scikit-Learn — بدون شبكات عصبية عميقة 🏆</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
