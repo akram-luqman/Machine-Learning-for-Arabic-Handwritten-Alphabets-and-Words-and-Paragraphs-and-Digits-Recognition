@@ -80,10 +80,21 @@ python app.py
 
 ---
 
-## 5. 🚫 ملفات لا تُرفع لـ GitHub
+## 5. 📚 مجموعات البيانات وروابط تحميلها (Datasets)
+نظراً لكبر حجم البيانات، يتم تحميلها وفك ضغطها داخل مجلد `datasets/`:
+1. **[Arabic Digits (AHDD)](https://www.kaggle.com/mloey1/ahdd1)**
+2. **[Arabic Letters (AHCD)](https://www.kaggle.com/mloey1/ahcd1)**
+3. **[ADBase & MADBase](https://datacenter.aucegypt.edu/shazeem/)** (الجامعة الأمريكية AUC)
+4. **[Mendeley Alphabets, Words and Paragraphs](https://data.mendeley.com/datasets/2h76672znt/2)**
+
+---
+
+## 6. 🚫 ملفات لا تُرفع لـ GitHub
 
 ملف `.gitignore` يستثني تلقائياً:
 - `datasets/` (أكبر من 100MB)
-- `*.joblib` (ملفات النماذج)
+- `models/` و `*.joblib` (ملفات النماذج)
+- `project_summary.md` (ملاحظات الرفع)
 - `__pycache__/` و `.ipynb_checkpoints/`
 - `venv/` و `logs/`
+

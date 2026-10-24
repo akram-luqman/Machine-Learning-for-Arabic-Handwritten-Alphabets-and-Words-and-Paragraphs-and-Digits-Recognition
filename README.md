@@ -160,17 +160,72 @@ python app.py
 
 ---
 
-## 📚 مجموعات البيانات المستخدمة
+## 📚 مجموعات البيانات وطريقة تحميلها (Datasets Setup)
 
-| المجموعة | المهمة | عينات التدريب | عينات الاختبار | الأبعاد | الفئات |
-|:---|:---:|:---:|:---:|:---:|:---:|
-| **AHCD** (حروف) | تعرف حروف | 13,440 | 3,360 | 32×32 | 28 حرف |
-| **AHDD** (أرقام) | تعرف أرقام | 60,000 | 10,000 | 28×28 | 10 أرقام |
-| **AHDBase** | أرقام BMP | آلاف | آلاف | متنوعة | 10 |
-| **MAHDBase** | أرقام معدّلة | آلاف | آلاف | متنوعة | 10 |
-| **كلمات+فقرات** | نصوص | 8,200 كلمة | — | متنوعة | 10 كلمات × 82 كاتب |
+نظراً لحجم البيانات الكبير (+150MB)، تم استبعاد مجلد `datasets/` من مستودع GitHub عبر `.gitignore`.  
+لتشغيل التدريب أو استعراض النوت بوك، يُرجى **تحميل مجموعات البيانات وفك ضغطها داخل مجلد `datasets/`** بنفس الهيكلية الموضحة أدناه.
 
-**الإجمالي:** أكثر من **150,000 عينة** من 82 كاتباً مختلفاً
+### 🔗 روابط التحميل المباشرة:
+
+1. **[Arabic Handwritten Digits Dataset (AHDD)](https://www.kaggle.com/mloey1/ahdd1)** — أرقام عربية (70,000 عينة بتنسيق CSV).
+2. **[Arabic Handwritten Characters Dataset (AHCD)](https://www.kaggle.com/mloey1/ahcd1)** — حروف عربية (16,800 عينة بتنسيق CSV).
+3. **[ADBase & MADBase (AUC Datacenter)](https://datacenter.aucegypt.edu/shazeem/)** — قاعدة بيانات الأرقام العربية من الجامعة الأمريكية بالقاهرة بتنسيق صور BMP.
+4. **[Arabic Handwritten Alphabets, Words and Paragraphs (Mendeley)](https://data.mendeley.com/datasets/2h76672znt/2)** — قاعدة بيانات شاملة للحروف والكلمات والفقرات (82 كاتباً).
+
+---
+
+### 📂 هيكلية مجلد `datasets/` المطلوبة بعد فك الضغط:
+
+قم بإنشاء مجلد باسم `datasets` في المجلد الرئيسي للمشروع، وضع المجلدات والملفات المفكوكة داخله بهذه الأسماء:
+
+```
+datasets/
+│
+├── httpswww.kaggle.commloey1ahdd1/
+│   ├── csvTrainImages 60k x 784.csv
+│   ├── csvTrainLabel 60k x 1.csv
+│   ├── csvTestImages 10k x 784.csv
+│   └── csvTestLabel 10k x 1.csv
+│
+├── httpswww.kaggle.commloey1ahcd1/
+│   ├── csvTrainImages 13440x1024.csv
+│   ├── csvTrainLabel 13440x1.csv
+│   ├── csvTestImages 3360x1024.csv
+│   └── csvTestLabel 3360x1.csv
+│
+├── AHDBase_TrainingSet/
+│   ├── Part01/
+│   └── ... Part05/
+├── AHDBase_TestingSet/
+│   ├── Part01/
+│   └── Part02/
+│
+├── MAHDBase_TrainingSet/
+│   ├── Part01/
+│   └── ... Part05/
+├── MAHDBase_TestingSet/
+│   ├── Part01/
+│   └── Part02/
+│
+└── Arabic_Handwritten_Alphabets_Words_and_Paragraphs/
+    ├── isolated_alphabets_per_alphabet/
+    ├── isolated_alphabets_per_user/
+    ├── isolated_words_per_user/
+    ├── paragraphs_per_user/
+    └── raw_dataset/
+```
+
+### 📊 ملخص إحصائيات البيانات:
+
+| المجموعة | المهمة | عينات التدريب | عينات الاختبار | الأبعاد | الفئات | الرابط المصدر |
+|:---|:---:|:---:|:---:|:---:|:---:|:---:|
+| **AHCD** | حروف | 13,440 | 3,360 | 32×32 | 28 حرف | [Kaggle AHCD](https://www.kaggle.com/mloey1/ahcd1) |
+| **AHDD** | أرقام | 60,000 | 10,000 | 28×28 | 10 أرقام | [Kaggle AHDD](https://www.kaggle.com/mloey1/ahdd1) |
+| **AHDBase** | أرقام BMP | 60,000 | 10,000 | متنوعة | 10 | [AUC Datacenter](https://datacenter.aucegypt.edu/shazeem/) |
+| **MAHDBase** | أرقام معدّلة | 60,000 | 10,000 | متنوعة | 10 | [AUC Datacenter](https://datacenter.aucegypt.edu/shazeem/) |
+| **كلمات+فقرات** | نصوص | 8,200 كلمة | — | متنوعة | 10 كلمات × 82 كاتب | [Mendeley Data](https://data.mendeley.com/datasets/2h76672znt/2) |
+
+**الإجمالي:** أكثر من **150,000 عينة** بخط يد 82 كاتباً مختلفاً.
 
 ---
 
