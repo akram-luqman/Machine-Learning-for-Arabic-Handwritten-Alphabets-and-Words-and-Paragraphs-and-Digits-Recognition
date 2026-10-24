@@ -27,6 +27,7 @@ data/splits/
 
 # 3. ملفات وإرشادات العمل الخاصة / الداخلية
 project_summary.md
+conversation_transcript.md
 *.gitkeep
 *.getkeep
 
