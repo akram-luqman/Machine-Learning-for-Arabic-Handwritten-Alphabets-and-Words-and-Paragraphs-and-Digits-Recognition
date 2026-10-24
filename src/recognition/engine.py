@@ -67,6 +67,8 @@ class ArabicRecognitionEngine:
         self.char_model = None
         self.digit_scaler = None
         self.char_scaler = None
+        self.digit_pca = None
+        self.char_pca = None
         self.digit_classes = None
         self.char_classes = None
         self.digit_accuracy = 0.0
@@ -81,6 +83,7 @@ class ArabicRecognitionEngine:
                 payload = joblib.load(digit_path)
                 self.digit_model = payload["classifier"]
                 self.digit_scaler = payload.get("scaler")
+                self.digit_pca = payload.get("pca")
                 self.digit_classes = payload["classes"]
                 self.digit_accuracy = payload.get("accuracy", 0)
                 logger.info(f"✅ تم تحميل نموذج الأرقام (دقة: {self.digit_accuracy*100:.1f}%)")
@@ -94,6 +97,7 @@ class ArabicRecognitionEngine:
                 payload = joblib.load(char_path)
                 self.char_model = payload["classifier"]
                 self.char_scaler = payload.get("scaler")
+                self.char_pca = payload.get("pca")
                 self.char_classes = payload["classes"]
                 self.char_accuracy = payload.get("accuracy", 0)
                 logger.info(f"✅ تم تحميل نموذج الحروف (دقة: {self.char_accuracy*100:.1f}%)")
@@ -123,15 +127,62 @@ class ArabicRecognitionEngine:
             return None
 
     def _preprocess_for_model(self, img: np.ndarray, target_size: Tuple[int, int]) -> np.ndarray:
-        """معالجة الصورة وتحويلها لمتجه بكسلات مطبّع"""
+        """معالجة الصورة وتحويلها لمتجه بكسلات مطبّع مع محاذاة وتوسيط الرسم"""
         if len(img.shape) == 3:
             # تحويل إلى رمادي
             img = np.mean(img, axis=2).astype(np.uint8)
+
+        # التحقق مما إذا كانت الخلفية بيضاء والرسم أسود (كما في المستندات الورقية المرفوعة) لعكسها
+        if img.shape[0] > 10 and img.shape[1] > 10:
+            corners = [img[0, 0], img[0, -1], img[-1, 0], img[-1, -1]]
+            if np.mean(corners) > 127:
+                img = 255 - img
+
+        # اقتصاص حول محتوى الرسم إذا كانت الصورة أكبر من الحجم المستهدف (مثل Canvas 300x300)
+        if img.shape[0] > target_size[0] or img.shape[1] > target_size[1]:
+            non_zero = np.argwhere(img > 25)
+            if non_zero.size > 0:
+                y_min, x_min = non_zero.min(axis=0)
+                y_max, x_max = non_zero.max(axis=0)
+                cropped = img[y_min:y_max + 1, x_min:x_max + 1]
+                h, w = cropped.shape
+                side = max(h, w)
+                pad = int(side * 0.18)
+                new_side = side + 2 * pad
+                square = np.zeros((new_side, new_side), dtype=np.uint8)
+                y_offset = (new_side - h) // 2
+                x_offset = (new_side - w) // 2
+                square[y_offset:y_offset + h, x_offset:x_offset + w] = cropped
+                img = square
 
         pil_img = Image.fromarray(img)
         pil_img = pil_img.resize(target_size, Image.Resampling.BILINEAR)
         arr = np.array(pil_img).astype(np.float64) / 255.0
         return arr.flatten()
+
+    def _transform_features(self, vector: np.ndarray, pca=None, scaler=None) -> np.ndarray:
+        """تطبيق تقليل الأبعاد (PCA) والمعايرة (Scaler) بالترتيب المناسب حسب خصائص النموذج"""
+        vec = vector.reshape(1, -1) if vector.ndim == 1 else vector
+
+        if pca is not None and scaler is not None:
+            pca_in = getattr(pca, "n_features_in_", None)
+            scaler_in = getattr(scaler, "n_features_in_", None)
+
+            if pca_in == vec.shape[1]:
+                vec = pca.transform(vec)
+                vec = scaler.transform(vec)
+            elif scaler_in == vec.shape[1]:
+                vec = scaler.transform(vec)
+                vec = pca.transform(vec)
+            else:
+                vec = pca.transform(vec)
+                vec = scaler.transform(vec)
+        elif pca is not None:
+            vec = pca.transform(vec)
+        elif scaler is not None:
+            vec = scaler.transform(vec)
+
+        return vec
 
     def recognize(self, image: np.ndarray, mode: str = "auto") -> Dict[str, Any]:
         """
@@ -163,10 +214,7 @@ class ArabicRecognitionEngine:
             return {"success": False, "error": "نموذج الأرقام غير محمّل. شغّل التدريب أولاً."}
 
         vector = self._preprocess_for_model(image, (28, 28))
-        if self.digit_scaler is not None:
-            vector = self.digit_scaler.transform(vector.reshape(1, -1))
-        else:
-            vector = vector.reshape(1, -1)
+        vector = self._transform_features(vector, pca=self.digit_pca, scaler=self.digit_scaler)
 
         pred = self.digit_model.predict(vector)[0]
         probs = self._get_proba(self.digit_model, vector)
@@ -199,10 +247,7 @@ class ArabicRecognitionEngine:
             return {"success": False, "error": "نموذج الحروف غير محمّل. شغّل التدريب أولاً."}
 
         vector = self._preprocess_for_model(image, (32, 32))
-        if self.char_scaler is not None:
-            vector = self.char_scaler.transform(vector.reshape(1, -1))
-        else:
-            vector = vector.reshape(1, -1)
+        vector = self._transform_features(vector, pca=self.char_pca, scaler=self.char_scaler)
 
         pred = self.char_model.predict(vector)[0]
         probs = self._get_proba(self.char_model, vector)
@@ -247,8 +292,9 @@ class ArabicRecognitionEngine:
             return {"success": False, "error": "لا توجد نماذج محمّلة. شغّل التدريب في النوت بوك أولاً."}
 
         # اختيار النتيجة الأعلى ثقة
-        best = max(results, key=lambda r: r.get("confidence", 0))
-        best["all_results"] = results
+        best_chosen = max(results, key=lambda r: r.get("confidence", 0))
+        best = dict(best_chosen)
+        best["all_results"] = [dict(r) for r in results]
         return best
 
     def _recognize_word(self, image: np.ndarray) -> Dict[str, Any]:
